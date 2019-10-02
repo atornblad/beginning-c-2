@@ -1,0 +1,52 @@
+header {
+    display: flex;
+    flex-direction: row;
+}
+
+header > nav {
+    display: flex;
+    flex-direction: row;
+}
+
+header > nav:last-child {
+    flex-grow: 1;
+}
+
+header > nav > ul {
+    display: flex;
+    flex-direction: row;
+    list-style: none inside;
+}
+
+header li {
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+header li.separator {
+    width: 1px;
+    background-color: rgba(128, 128, 128, 0.5);
+}
+
+header li.separator + li.separator {
+    display: none;
+}
+
+header button {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: #eee;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #333;
+    padding: 8px;
+}
+
+header button:hover {
+    background-color: #ddd;
+}
+
+header button[disabled] {
+    cursor: not-allowed;
+    background-color: #fff;
+    color: #999;
+}
