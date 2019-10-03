@@ -15,37 +15,45 @@ class Precompiler {
         this.definitions['__TIME__'] = now.format('"HH:mm:ss"');
         console.log(JSON.stringify(this.definitions, null, '  '));
 
-        const pos = 0;
-        const line = 1;
+        const includeStack = [ ];
+
+        let pos = 0;
+        let line = 1;
         let startOfLine;
 
         // STATES:
         const START_OF_LINE = 0;
         const INITIAL_LINE_WHITESPACE = 1;
+        const AFTER_INITIAL_HASH = 2;
+        const NON_PREPROCESSOR_DIRECTIVE = 3;
 
         let state = START_OF_LINE;
         let currentLine = '';
 
         this.definitions['__LINE__'] = line;
+        let result = [];
 
         const length = this.rawCode.length;
         while (pos < length) {
             if (state === START_OF_LINE) {
                 startOfLine = pos;
+                currentLine = '';
                 state = INITIAL_LINE_WHITESPACE;
             }
 
             const ch = this.rawCode.charCodeAt(pos);
             if (ch === 92) { // backslash
                 const ch2 = this.rawCode.charCodeAt(pos + 1);
-                if (ch === 10) {
+                if (ch2 === 10) {
                     ++line;
                     this.definitions['__LINE__'] = line;
-                    pos += 2;
                 }
                 else {
-
+                    currentLine += '\\';
+                    currentLine += String.fromCharCode(ch2);
                 }
+                pos += 2;
+                continue;
             }
 
             switch (state) {
@@ -55,16 +63,43 @@ class Precompiler {
                         case 10:
                         case 32:
                             ++pos;
+                            currentLine += String.fromCharCode(ch);
                             break;
                         case 35:    // #
                             state = AFTER_INITIAL_HASH;
                             ++pos;
                             break;
+                        default:
+                            state = NON_PREPROCESSOR_DIRECTIVE;
+                            currentLine += String.fromCharCode(ch);
+                            ++pos;
+                            break;
                     }
+                    break;
+                case NON_PREPROCESSOR_DIRECTIVE:
+                    switch (ch) {
+                        case 10:
+                            result.push(currentLine);
+                            currentLine = '';
+                            ++line;
+                            ++pos;
+                            this.definitions['__LINE__'] = line;
+                            state = START_OF_LINE;
+                            break;
+                        default:
+                            currentLine += String.fromCharCode(ch);
+                            ++pos;
+                            break;
+                    }
+                    break;
+                case AFTER_INITIAL_HASH:
+                default:
+                    throw `Not yet implemented: state ${state}`;
+                
             }
         }
 
-        return this.rawCode;
+        return result.join('\n');
     }
 }
 
