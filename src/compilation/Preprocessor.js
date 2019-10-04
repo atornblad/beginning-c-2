@@ -98,7 +98,7 @@ class Preprocessor {
                     tokens.push(token);
                 }
                 else {
-                    throw `Unexpected character '${ch}' (code ${ch.charCodeAt(0)})`;
+                    throw new Error(`Unexpected character '${ch}' (code ${ch.charCodeAt(0)})`);
                 }
             }
 
@@ -126,7 +126,7 @@ class Preprocessor {
                         this.doDefine(args);
                         break;
                     default:
-                        throw `Not yet implemented: ${line.trim()}`;
+                        throw new Error(`Not yet implemented: ${line.trim()}`);
                 }
                 console.log(directiveMatch);
             }
