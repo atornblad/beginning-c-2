@@ -75,7 +75,7 @@ Total global variables: ${exe.$memBottom} bytes`;
                     run: { show: true, enable: this.state.exe, onClick: this.onRunButtonClicked.bind(this) }
                 }} />
                 <CodeEditor
-                    code={"#define ONE 1\n\nconst int x = ONE;\n\nint main() {\n    return ONE + x;\n}\n"}
+                    code={"int x = 99999;\nshort int y = 333;\n\nvoid main() {\n    x = 123;\n    y = 234;\n}\n"}
                     onHasChangesUpdated={this.onEditorHasChangesUpdated.bind(this)}
                     onHasCodeUpdated={this.onEditorHasCodeUpdated.bind(this)}
                     ref={this.editorRef}
