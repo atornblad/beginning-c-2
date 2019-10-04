@@ -1,5 +1,3 @@
-import { throwStatement } from "@babel/types";
-
 const trigraphs = {
     '(' : '[',
     ')' : ']',
