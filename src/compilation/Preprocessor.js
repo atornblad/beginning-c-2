@@ -6,8 +6,12 @@ const punctuators = [
     '*','*=',
     '/','/=',
     '%','%=',
-    '&','&&','&=','&&=',
-    '|','||','|=','||=',
+    '&','&&','&=',
+    '|','||','|=',
+    '^', '^=',
+    '=', '==',
+    '!', '!=',
+    '~', '~=',
     '?',':',
     ';',
     '[',']',
@@ -15,12 +19,12 @@ const punctuators = [
     '(',')',
     ',',
     '.',
-    '->'
+    '->',
+    '>', '>>', '>=', '>>=',
+    '<', '<<', '<=', '<<='
 ];
 
 const startsOfPunctuators = [...new Set(punctuators.map(p => p.substring(0,1)))];
-
-console.log({punctuators, startsOfPunctuators});
 
 const isStartOfIdentifier = ch => /^[a-zA-Z_]$/.test(ch);
 const isIdentifier = ch => /^[a-zA-Z0-9_]$/.test(ch);
@@ -34,8 +38,8 @@ class Preprocessor {
     constructor(lines, filename) {
         this.lines = lines;
         this.definitions = {
-            __FILE__: `"${filename || 'editor'}"`,
-            __LINE__: 0
+            "__FILE__": `"${filename || 'editor'}"`,
+            "__LINE__": "0"
         };
     }
 
@@ -55,8 +59,14 @@ class Preprocessor {
 
     tokenize(lines, subTokens) {
         const tokens = [];
+        let lineNo = 0;
 
         for (const line of lines) {
+            if (!subTokens) {
+                ++lineNo;
+                this.definitions["__LINE__"] = `${lineNo}`;
+            }
+
             let i = 0;
 
             while (i < line.length) {
@@ -69,7 +79,6 @@ class Preprocessor {
                         ch = line[i];
                     }
                     const token = line.substring(tokenStart, i);
-                    console.log({type:'space', tokenStart,i, token});
                     tokens.push(token);
                 }
                 else if (isStartOfIdentifier(ch)) {
@@ -81,11 +90,9 @@ class Preprocessor {
                     if (this.definitions[token]) {
                         const replacement = this.definitions[token];
                         const replacementTokens = this.tokenize([replacement], true);
-                        console.log({type:'replaced_identifier', tokenStart, i, replacementTokens})
                         tokens.push(...replacementTokens);
                     }
                     else {
-                        console.log({type:'identifier', tokenStart, i, token});
                         tokens.push(token);
                     }
                 }
@@ -104,7 +111,6 @@ class Preprocessor {
                             ch = ch2;
                         }
                     }
-                    console.log({type: 'number', tokenStart, i, token});
                     tokens.push(token);
                 }
                 else if (isStartOfPunctuation(ch)) {
@@ -114,7 +120,6 @@ class Preprocessor {
                         ++i;
                         ch = line[i];
                     }
-                    console.log({type:'punctuation', tokenStart, i, token});
                     tokens.push(token);
                 }
                 else if (ch === '\'' || ch === '"') {
@@ -137,7 +142,6 @@ class Preprocessor {
                     }
                     token += endOfToken;
                     ++i;
-                    console.log({type: 'string literal',  tokenStart, i, token });
                     tokens.push(token);
                 }
                 else {
@@ -147,8 +151,6 @@ class Preprocessor {
 
             if (!subTokens) tokens.push('\n');
         }
-
-        console.log({tokens});
 
         return tokens;
     }
@@ -172,14 +174,11 @@ class Preprocessor {
                     default:
                         throw new Error(`Not yet implemented: ${line.trim()}`);
                 }
-                console.log(directiveMatch);
             }
             else {
                 outputLines.push(line);
             }
         }
-
-        console.log({outputLines});
 
         const tokens = this.tokenize(outputLines);
 

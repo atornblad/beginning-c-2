@@ -11,7 +11,6 @@ const trigraphs = {
 };
 
 const trigraphReplacer = (match, ...groups) => {
-    console.log({match, groups});
     return trigraphs[groups[0]] || match;
 }
 
