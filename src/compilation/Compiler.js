@@ -64,14 +64,8 @@ const cparse = (function () {
         "--": 13 //suffixed --
     };
 
-    const rightToLeftAssociativity = {
-        "1": true,
-        "2": true,
-        "12": true
-    };
-
     const stringEscapes = {
-        "a": "\a",
+        "a": "\x07",
         "b": "\b",
         "f": "\f",
         "n": "\n",
@@ -81,7 +75,7 @@ const cparse = (function () {
         "\\": "\\",
         "'": "'",
         "\"": "\"",
-        "?": "\?"
+        "?": "?"
     };
 
     const defaultTypeNames = ["void", "char", "short", "int", "long", "float", "double"];
