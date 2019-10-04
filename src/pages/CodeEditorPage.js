@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import Header from '../common-components/Header';
 import CodeEditor from '../editor/CodeEditor';
-import Precompiler from '../compilation/Precompiler';
+import StageOneProcessor from '../compilation/StageOneProcessor';
+import Preprocessor from '../compilation/Preprocessor';
 import Compiler from '../compilation/Compiler';
 
 export default class CodeEditorPage extends Component {
@@ -30,8 +31,11 @@ export default class CodeEditorPage extends Component {
     }
 
     async onCompileButtonClicked() {
-        const precompiler = new Precompiler(this.editorRef.current.getValue());
-        const code = await precompiler.precompile();
+        const stageOne = new StageOneProcessor(this.editorRef.current.getValue());
+        const cleanedCodeLines = await stageOne.processAndGetLines();
+
+        const preprocessor = new Preprocessor(cleanedCodeLines);
+        const code = await preprocessor.preprocess();
 
         const compiler = new Compiler(code);
 
@@ -55,7 +59,7 @@ export default class CodeEditorPage extends Component {
                     run: { show: true, enable: this.state.ast }
                 }} />
                 <CodeEditor
-                    code={"int main() {\n    return 1+2;\n}\n"}
+                    code={"#define ONE 1\n\nint main() {\n    return ONE + TWO;\n}\n"}
                     onHasChangesUpdated={this.onEditorHasChangesUpdated.bind(this)}
                     onHasCodeUpdated={this.onEditorHasCodeUpdated.bind(this)}
                     ref={this.editorRef}
