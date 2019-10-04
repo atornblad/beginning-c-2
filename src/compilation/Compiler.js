@@ -212,8 +212,7 @@ const cparse = (function () {
             let stmts = [];
             consume("{");
 
-            while (!(curr == "}" || !curr)) {
-                let pos = getPos();
+            while (!(curr === "}" || !curr)) {
                 let stmt = parseStatement();
                 stmts.push(stmt);
             }
@@ -381,7 +380,7 @@ const cparse = (function () {
             }
             else if (lookahead("'")) {
                 let val = curr.charCodeAt(0);
-                if (curr == "\\")
+                if (curr === "\\")
                     val = readEscapeSequence().charCodeAt(0);
                 else
                     next(true, true);
@@ -540,13 +539,13 @@ const cparse = (function () {
         }
 
         function stringIncoming() {
-            return curr && curr == "\"";
+            return curr && curr === "\"";
         }
         function readString(keepBlanks) {
             let val = [];
             next(true, true);
-            while (curr && curr != "\"") {
-                if (curr == "\\") {
+            while (curr && curr !== "\"") {
+                if (curr === "\\") {
                     next(true, true);
                     val.push(readEscapeSequence());
                 }
@@ -562,7 +561,7 @@ const cparse = (function () {
             return val.join("");
         }
         function readEscapeSequence() {
-            if (curr == "x") {
+            if (curr === "x") {
                 next(true, true);
                 let val = 0;
                 while (/[0-9A-Fa-f]/.test(curr)) {
@@ -594,7 +593,7 @@ const cparse = (function () {
             return curr && /[0-9]/.test(curr);
         }
         function readNumber(keepBlanks) {
-            let val = read(/[0-9\.]/, "Number", /[0-9]/, keepBlanks);
+            let val = read(/[0-9.]/, "Number", /[0-9]/, keepBlanks);
             return parseFloat(val);
         }
 
@@ -651,7 +650,7 @@ const cparse = (function () {
         function lookahead(str, keepBlanks) {
             let _index = index;
             for (let i = 0; i < str.length; i++) {
-                if (curr != str[i]) {
+                if (curr !== str[i]) {
                     index = _index;
                     curr = src[index];
                     return false;
@@ -672,7 +671,7 @@ const cparse = (function () {
 
         function consume(str) {
             for (let i = 0; i < str.length; i++) {
-                if (curr != str[i])
+                if (curr !== str[i])
                     unexpected(str);
                 next();
             }
@@ -686,7 +685,7 @@ const cparse = (function () {
         function next(includeSpaces, includeComments) {
             includeSpaces = includeSpaces || false;
 
-            if (curr == "\n")
+            if (curr === "\n")
                 position.line++;
             index++;
             curr = src[index];
@@ -694,13 +693,13 @@ const cparse = (function () {
             do {
                 var skipped = skipComments() || skipSpaces();
 
-                if (!includeSpaces && (index == 0 || src[index - 1] == "\n") && curr == "#") {
+                if (!includeSpaces && (index === 0 || src[index - 1] === "\n") && curr === "#") {
                     consume("#");
-                    let line = position.line = readNumber(true) - 1;
+                    position.line = readNumber(true) - 1;
                     consume(" ");
                     position.file = readString(true);
 
-                    while (curr != "\n") {
+                    while (curr !== "\n") {
                         index++;
                         curr = src[index];
                     }
@@ -714,7 +713,7 @@ const cparse = (function () {
 
                 if (/[\s\n]/.test(curr)) {
                     while (curr && /[\s\n]/.test(curr)) {
-                        if (curr == "\n")
+                        if (curr === "\n")
                             position.line++;
                         index++;
                         curr = src[index];
@@ -726,16 +725,16 @@ const cparse = (function () {
             function skipComments() {
                 if (includeComments)
                     return;
-                if (curr && curr == "/" && src[index + 1] == "/") {
-                    while (curr != "\n") {
+                if (curr && curr === "/" && src[index + 1] === "/") {
+                    while (curr !== "\n") {
                         index++;
                         curr = src[index];
                     }
                     return true;
                 }
-                if (curr && curr == "/" && src[index + 1] == "*") {
-                    while (curr != "*" || src[index + 1] != "/") {
-                        if (curr == "\n")
+                if (curr && curr === "/" && src[index + 1] === "*") {
+                    while (curr !== "*" || src[index + 1] !== "/") {
+                        if (curr === "\n")
                             position.line++;
                         index++;
                         curr = src[index];
