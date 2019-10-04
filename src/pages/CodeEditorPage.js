@@ -16,6 +16,7 @@ export default class CodeEditorPage extends Component {
         }
 
         this.editorRef = React.createRef();
+        this.outputRef = React.createRef();
     }
 
     onEditorHasChangesUpdated(newValue) {
@@ -41,10 +42,10 @@ export default class CodeEditorPage extends Component {
 
         try {
             const ast = await compiler.generateAst();
-            console.log(JSON.stringify(ast, null, '  '));
+            this.outputRef.current.value = JSON.stringify(ast, null, '  ');
         }
         catch (e) {
-            console.error(e);
+            this.outputRef.current.value = e;
         }
     }
 
@@ -64,6 +65,7 @@ export default class CodeEditorPage extends Component {
                     onHasCodeUpdated={this.onEditorHasCodeUpdated.bind(this)}
                     ref={this.editorRef}
                 />
+                <textarea id="output" rows="10" ref={this.outputRef}></textarea>
             </>
         );
     }

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { ControlledEditor } from '@monaco-editor/react';
+import './code-editor.css';
 
 class CodeEditor extends Component {
     constructor(props) {
@@ -48,14 +49,17 @@ class CodeEditor extends Component {
         console.log('rendering');
 
         return (
-            <ControlledEditor
-                height="100%"
-                language="c"
-                theme="vs-dark"
-                value={code}
-                options={options}
-                onChange={this.onChange.bind(this)}
-            />
+            <div id="editor-holder">
+                <ControlledEditor
+                    height="100%"
+                    className="editor"
+                    language="c"
+                    theme="vs-dark"
+                    value={code}
+                    options={options}
+                    onChange={this.onChange.bind(this)}
+                />
+            </div>
         )
     }
 }
