@@ -22,7 +22,10 @@ const typeSizes = {
     'int|short|signed' : 2,
     'short|signed' : 2,
     'int|short|unsigned' : 2,
-    'short|unsigned' : 2
+    'short|unsigned' : 2,
+
+    'float' : 4,
+    'double' : 8
 };
 
 const viewSetters = {
@@ -43,7 +46,10 @@ const viewSetters = {
     'int|short|signed' : 'setInt16',
     'short|signed' : 'setInt16',
     'int|short|unsigned' : 'setUint16',
-    'short|unsigned' : 'setUint16'
+    'short|unsigned' : 'setUint16',
+
+    'float' : 'setFloat32',
+    'double' : 'setFloat64'
 };
 
 const getTypeInfo = function(defType) {

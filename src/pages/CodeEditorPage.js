@@ -60,7 +60,7 @@ Total global variables: ${exe.$memBottom} bytes`;
     async onRunButtonClicked() {
         console.log(this);
         await this.state.exe.$prolog();
-        const ram = Array.from(Array(this.state.exe.$memBottom)).map((_, i) => `${i}: ${this.state.exe.$memory[i]}`).join('\n');
+        const ram = Array.from(Array(this.state.exe.$memBottom)).map((_, i) => `${i}: ${this.state.exe.$memory[i].toString(16).padStart(2, '0')}`).join('\n');
         this.outputRef.current.value = `RAM contents: \n${ram}`;
     }
 
@@ -75,7 +75,7 @@ Total global variables: ${exe.$memBottom} bytes`;
                     run: { show: true, enable: this.state.exe, onClick: this.onRunButtonClicked.bind(this) }
                 }} />
                 <CodeEditor
-                    code={"int x = 99999;\nshort int y = 333;\n\nvoid main() {\n    x = 123;\n    y = 234;\n}\n"}
+                    code={"int x = 99999;\nfloat y = 333.3;\n\nvoid main() {\n    x = 123;\n    y = 234.5;\n}\n"}
                     onHasChangesUpdated={this.onEditorHasChangesUpdated.bind(this)}
                     onHasCodeUpdated={this.onEditorHasCodeUpdated.bind(this)}
                     ref={this.editorRef}
