@@ -22,17 +22,19 @@ const startsOfPunctuators = [...new Set(punctuators.map(p => p.substring(0,1)))]
 
 console.log({punctuators, startsOfPunctuators});
 
-const isStartOfIdentifier = ch => /[a-zA-Z_]/.test(ch);
-const isIdentifier = ch => /[a-zA-Z0-9_]/.test(ch);
-const isSpace = ch => /\s/.test(ch);
+const isStartOfIdentifier = ch => /^[a-zA-Z_]$/.test(ch);
+const isIdentifier = ch => /^[a-zA-Z0-9_]$/.test(ch);
+const isSpace = ch => /^\s$/.test(ch);
 const isStartOfPunctuation = ch => startsOfPunctuators.includes(ch);
 const isPunctuation = token => punctuators.includes(token);
+const isDecimalDigit = ch => /^[0-9]$/.test(ch);
+const isPreprocessorNumber = ch => /^[0-9a-zA-Z_.]$/.test(ch);
 
 class Preprocessor {
     constructor(lines, filename) {
         this.lines = lines;
         this.definitions = {
-            __FILE__: filename || 'editor',
+            __FILE__: `"${filename || 'editor'}"`,
             __LINE__: 0
         };
     }
@@ -51,7 +53,7 @@ class Preprocessor {
         this.definitions[name] = value;
     }
 
-    tokenize(lines) {
+    tokenize(lines, subTokens) {
         const tokens = [];
 
         for (const line of lines) {
@@ -78,7 +80,7 @@ class Preprocessor {
                     const token = line.substring(tokenStart, i);
                     if (this.definitions[token]) {
                         const replacement = this.definitions[token];
-                        const replacementTokens = this.tokenize([replacement]);
+                        const replacementTokens = this.tokenize([replacement], true);
                         console.log({type:'replaced_identifier', tokenStart, i, replacementTokens})
                         tokens.push(...replacementTokens);
                     }
@@ -86,6 +88,24 @@ class Preprocessor {
                         console.log({type:'identifier', tokenStart, i, token});
                         tokens.push(token);
                     }
+                }
+                else if ((ch === '.' && isDecimalDigit(line[i + 1])) || isDecimalDigit(ch)) {
+                    let token = '';
+                    while (isPreprocessorNumber(ch)) {
+                        token += ch;
+                        ++i;
+                        const ch2 = line[i];
+                        if (/^[eEpP]$/.test(ch) && /^[-+]$/.test(ch2)) {
+                            token += ch2;
+                            ++i;
+                            ch = line[i];
+                        }
+                        else {
+                            ch = ch2;
+                        }
+                    }
+                    console.log({type: 'number', tokenStart, i, token});
+                    tokens.push(token);
                 }
                 else if (isStartOfPunctuation(ch)) {
                     let token = '';
@@ -97,12 +117,35 @@ class Preprocessor {
                     console.log({type:'punctuation', tokenStart, i, token});
                     tokens.push(token);
                 }
+                else if (ch === '\'' || ch === '"') {
+                    const endOfToken = ch;
+                    let token = ch;
+                    ++i;
+                    ch = line[i];
+                    while (ch !== (void 0) && ch !== endOfToken) {
+                        if (ch === '\\') {
+                            token += ch;
+                            ++i;
+                            ch = line[i];
+                        }
+                        token += ch;
+                        ++i;
+                        ch = line[i];
+                    };
+                    if (ch === (void 0)) {
+                        throw new Error(`Unexpected end of line inside string literal`);
+                    }
+                    token += endOfToken;
+                    ++i;
+                    console.log({type: 'string literal',  tokenStart, i, token });
+                    tokens.push(token);
+                }
                 else {
                     throw new Error(`Unexpected character '${ch}' (code ${ch.charCodeAt(0)})`);
                 }
             }
 
-            tokens.push('\n');
+            if (!subTokens) tokens.push('\n');
         }
 
         console.log({tokens});
@@ -124,6 +167,7 @@ class Preprocessor {
                 switch (directive) {
                     case 'define':
                         this.doDefine(args);
+                        outputLines.push('');
                         break;
                     default:
                         throw new Error(`Not yet implemented: ${line.trim()}`);
